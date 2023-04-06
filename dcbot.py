@@ -6,6 +6,9 @@ import asyncio
 import pickle
 import os
 
+# https://discord.com/api/oauth2/authorize?client_id=1093681310763057214&permissions=277025414208&scope=bot
+
+
 # function to load the cache
 def load_cache(CACHE_FILE):
     try:

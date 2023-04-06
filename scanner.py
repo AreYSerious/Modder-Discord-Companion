@@ -21,9 +21,6 @@ def save_cache(cache, CACHE_FILE):
         pickle.dump(cache, f)
 
 
-BOT_TOKEN = "OTEwMjQyOTk4NDA1NjkzNDcw.GNMuwy.EgVbai3WqS9jizJRJOtHiNNHXkf2EbG7uZzvrU"
-
-
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
 @bot.event
