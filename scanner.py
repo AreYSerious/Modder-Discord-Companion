@@ -40,7 +40,7 @@ async def on_ready():
 
 @tasks.loop(seconds=15)
 async def main_loop():
-
+    print("Starting Loop ...")
 
     base_url_for_link = "https://mods.vintagestory.at"
     url = 'https://mods.vintagestory.at/home'
@@ -126,21 +126,23 @@ async def main_loop():
 
     for attribute, value in data.items():
         if attribute in old_data:
-            # print("Is known.")
+            print("Is known.")
             pass
         else:
-            # print("Is new.")
+            print("Is new.")
 
             subscriber = load_cache(f'data{os.sep}data.pickle')
 
+            print("Loaded subscriber successfully.")
 
             for xattribute, xvalue in subscriber.items():
 
                 if subscriber[xattribute] == value["messagereciever"]:
-
+                    print(f"Found a notification for {subscriber[xattribute]}")
                     # if is not
                     # This checks if the msg writer is the one getting notified and doesn't send a dm then
-                    if subscriber[xattribute] is not value["writer"]:
+                    if subscriber[xattribute] == value["writer"]:
+                        print(f"{subscriber[xattribute]} is {value['writer']}")
                         pass
                     else:
                         if len(value["text"]) >= 500:
@@ -148,7 +150,7 @@ async def main_loop():
                             shortend = toshorten[:400]
                             shortend = shortend + " ..."
                             value["text"] = shortend
-                        print(value["text"])
+                        print(value["text"].encode("utf-8"))
                         user = await bot.fetch_user(xattribute)
 
                         embed = discord.Embed(title="New comment on moddb!", url=value["modurl"], color=0xffffff)
@@ -160,8 +162,8 @@ async def main_loop():
                         await user.send(embed=embed)
 
                 if subscriber[xattribute] in value["text"]:
-                    print(value["modname"])
-                    print(value["text"])
+                    #print(value["modname"])
+                    #print(value["text"])
                     # if is not
                     # This checks if the msg writer is the one getting notified and doesn't send a dm then
 
@@ -195,7 +197,7 @@ async def main_loop():
 
     save_cache(old_data, f'data{os.sep}database.pickle')
 
-
+    print("... Successfully ending loop.")
 
 
 
