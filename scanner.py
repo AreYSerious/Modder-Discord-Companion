@@ -3,7 +3,7 @@ import traceback
 from TOKEN import BOT_TOKEN
 import requests
 from bs4 import BeautifulSoup
-import pickle
+import json
 import discord
 from discord.ext import tasks, commands
 from discord import app_commands
@@ -17,15 +17,18 @@ import os
 # function to load the cache
 def load_cache(CACHE_FILE):
     try:
-        with open(CACHE_FILE, "rb") as f:
-            return pickle.load(f)
+        with open(CACHE_FILE, "r") as f:
+            return json.load(f)
     except FileNotFoundError:
+        return None
+    except json.JSONDecodeError:
+        # Handle the case where the JSON file is corrupted or improperly formatted
         return None
 
 # function to save the cache
 def save_cache(cache, CACHE_FILE):
-    with open(CACHE_FILE, "wb") as f:
-        pickle.dump(cache, f)
+    with open(CACHE_FILE, "w") as f:
+        json.dump(cache, f)
 
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
@@ -40,7 +43,7 @@ async def on_ready():
     except Exception as e:
         print(e)
 
-@tasks.loop(seconds=15)
+@tasks.loop(seconds=60)
 async def main_loop():
     try:
 
@@ -109,7 +112,7 @@ async def main_loop():
             message = "Comment on " + column_modname + " from " + column_writer + ": " + column_text
             messages.append(message)
 
-            modautorfinder_baseurl = "https://mods.vintagestory.at/api/mods?orderby=downloads&text="
+            modautorfinder_baseurl = "https://mods.vintagestory.at/api/mods?orderby=comments&text="
             modautorfinder_modname_reformat = str(column_modname).replace(" ", "%20")
             modautorfinder_response = modautorfinder_baseurl + modautorfinder_modname_reformat
             modautorfinder_data = requests.get(modautorfinder_response).json()
@@ -126,7 +129,7 @@ async def main_loop():
 
         # new data = data
 
-        old_data = load_cache(f'data{os.sep}database.pickle')
+        old_data = load_cache(f'data{os.sep}database.json')
 
         for attribute, value in data.items():
             if attribute in old_data:
@@ -135,7 +138,7 @@ async def main_loop():
             else:
                 print("Is new.")
 
-                subscriber = load_cache(f'data{os.sep}data.pickle')
+                subscriber = load_cache(f'data{os.sep}data.json')
 
                 print("Loaded subscriber successfully.")
 
@@ -199,7 +202,7 @@ async def main_loop():
 
                 old_data[attribute] = value
 
-        save_cache(old_data, f'data{os.sep}database.pickle')
+        save_cache(old_data, f'data{os.sep}database.json')
 
         print("... Successfully ending loop.")
     except Exception:
@@ -219,11 +222,11 @@ async def main_loop():
 async def link(interaction: discord.Interaction, modauthorname: str):
     msg_author = interaction.user.id
     print(f"Linked {msg_author} to {modauthorname}")
-    data = load_cache(f'data{os.sep}data.pickle')
+    data = load_cache(f'data{os.sep}data.json')
     try:
         data[str(msg_author)] = str(modauthorname)
         #print(data)
-        save_cache(data, f'data{os.sep}data.pickle')
+        save_cache(data, f'data{os.sep}data.json')
     except:
         print("Failed Saving")
 
@@ -237,11 +240,11 @@ async def link(interaction: discord.Interaction, modauthorname: str):
 async def unlink(interaction: discord.Interaction, modauthorname: str):
     msg_author = interaction.user.id
     print(f"Unlinked {msg_author} to {modauthorname}")
-    data = load_cache(f'data{os.sep}data.pickle')
+    data = load_cache(f'data{os.sep}data.json')
     try:
         del data[str(msg_author)]
         #print(data)
-        save_cache(data, f'data{os.sep}data.pickle')
+        save_cache(data, f'data{os.sep}data.json')
     except:
         print("Failed Saving")
     embed_link = discord.Embed(title="Unlinked your ModDB Account.", color=0xffffff)
